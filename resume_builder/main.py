@@ -1,20 +1,28 @@
-import ollama
-import os
+from resume_builder.agent import get_general_agent
 
-
-def get_ollama_host()-> str:
-    host = os.getenv('OLLAMA_HOST', "http://localhost:11434")
-    return host
-
-def get_ollama_model()-> str:
-    return "qwen3.5:0.8b"
 
 def main():
-    ollama_host = get_ollama_host()
-    client = ollama.Client(host=ollama_host)
-    model_name = get_ollama_model()
-    response = client.chat(model=model_name, messages=[{'role': 'user', 'content': 'Hello!'}])
-    print(response)
+    agent = get_general_agent()
+    user_input = (
+        "can you use read_local_file tool and read /mnt/d/resume_building/Dockerfile in the current directory"
+    )
+    agent_input = {"messages": [{"role": "user", "content": user_input}]}
+    stream_mode = ["updates", "custom", "messages"]
+    version = "v2"
+    stream_chunks = agent.stream(agent_input, stream_mode=stream_mode, version=version)
+    print("start streaming")
+    for chunk in stream_chunks:
+        # print(f"stream_mode: {chunk['type']}", flush=True)
+        # print(f"content: {chunk['data']}", flush=True)
+
+        if chunk['type'] == 'custom':
+            print(f"Custom chunk data: {chunk['data']}")
+
+        if chunk["type"] == "messages":
+            data, _metadata = chunk["data"]
+            if data.content:
+                print(data.content, end="", flush=True)
+    print()
 
 
 if __name__ == "__main__":
