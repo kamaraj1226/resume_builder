@@ -26,3 +26,6 @@ def read_local_file(file_path: str, runtime: ToolRuntime) -> str:
     content = path.read_text(encoding='utf-8')
     return content
     
+def get_current_working_dir() -> str:
+    current_working_dir  = str(Path.cwd())
+    return current_working_dir
