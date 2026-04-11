@@ -15,7 +15,6 @@ def get_general_agent():
         tools = [read_local_file],
         
     )
-
     return agent
 
 def get_file_system_explorer_agent():

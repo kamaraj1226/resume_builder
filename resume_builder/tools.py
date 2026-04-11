@@ -1,4 +1,5 @@
 from langchain.tools import tool, ToolRuntime
+from resume_builder.mcp_client.duckduckgo_mcp_client import get_dkdkg_client_tools
 from pathlib import Path
 
 # Read local file
@@ -29,3 +30,6 @@ def read_local_file(file_path: str, runtime: ToolRuntime) -> str:
 def get_current_working_dir() -> str:
     current_working_dir  = str(Path.cwd().resolve(strict=True))
     return current_working_dir
+
+async def dkdkg_web_search_tools():
+    return await get_dkdkg_client_tools()

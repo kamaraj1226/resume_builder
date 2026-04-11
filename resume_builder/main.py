@@ -2,9 +2,9 @@ from resume_builder.agent import get_file_system_explorer_agent
 from resume_builder.stream.stream import stream
 from resume_builder.constants import StreamMode
 import uuid
+import asyncio
 
-
-def main():
+async def async_main() -> None:
     agent = get_file_system_explorer_agent()
     session_id = str(uuid.uuid4())
     config = {
@@ -22,6 +22,9 @@ def main():
     )
     print()
 
+def main():
+    asyncio.run(async_main())
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(async_main())

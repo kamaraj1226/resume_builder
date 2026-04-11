@@ -35,13 +35,13 @@ def handle_updates(chunk):
 
     # 4. Return the structured dictionary required by the middleware
     if choice == "y":
-        return Command(resume={"decisions": [{"type": DecisionType.approve}]})
+        return Command(resume={"decisions": [{"type": DecisionType.approve.value}]})
 
     return Command(
         resume={
             "decisions": [
                 {
-                    "type": DecisionType.reject,
+                    "type": DecisionType.reject.value,
                     "comment": (
                         "User denied access to this file. Do not try to read it again. "
                         "Provide a response based only on what you already know."
