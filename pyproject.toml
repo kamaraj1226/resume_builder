@@ -4,13 +4,19 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "poethepoet>=0.44.0",
+]
 
 [tool.uv]
 package = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+
+[tool.poe.tasks]
+img-build = "docker build -t resume-builder ."
+img-run-once = "docker run -it --rm resume-builder"
 
 [project.scripts]
 main = "resume_builder.main:main"
