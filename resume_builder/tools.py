@@ -27,5 +27,5 @@ def read_local_file(file_path: str, runtime: ToolRuntime) -> str:
     return content
     
 def get_current_working_dir() -> str:
-    current_working_dir  = str(Path.cwd())
+    current_working_dir  = str(Path.cwd().resolve(strict=True))
     return current_working_dir

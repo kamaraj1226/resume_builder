@@ -17,3 +17,9 @@ def get_ollama_model():
     )
     return model
 
+def get_user_input():
+    user_input = (
+        "can you use read_file tool and"
+        "read /mnt/d/resume_building/Dockerfile in the current directory"
+    )
+    return user_input

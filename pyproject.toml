@@ -23,5 +23,10 @@ packages = ["src"]
 img-build = "docker build -t resume-builder ."
 img-run-once = "docker run -it --rm resume-builder"
 
+[dependency-groups]
+dev = [
+    "pylance>=4.0.0",
+]
+
 [project.scripts]
 main = "resume_builder.main:main"

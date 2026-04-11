@@ -1,6 +1,11 @@
 from langchain.agents import create_agent
 from resume_builder.tools import read_local_file
 from resume_builder.utils import get_ollama_model
+from langchain_community.agent_toolkits import FileManagementToolkit
+from langchain.agents.middleware import HumanInTheLoopMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+from resume_builder.tools import get_current_working_dir
+import os
 
 def get_general_agent():
     model = get_ollama_model()
@@ -13,13 +18,6 @@ def get_general_agent():
 
     return agent
 
-from langchain_community.agent_toolkits import FileManagementToolkit
-from langchain.agents.middleware import HumanInTheLoopMiddleware
-from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.types import Command
-from resume_builder.tools import get_current_working_dir
-import os
-
 def get_file_system_explorer_agent():
     model = get_ollama_model()
     working_dir = get_current_working_dir()
@@ -29,7 +27,8 @@ def get_file_system_explorer_agent():
 
     # human in the loop middleware
     interrupt_on = {tool.name : True for tool in tools}
-    interrupt_on['list_directory'] = False # Ne interrupts to list the directory
+    interrupt_on['list_directory'] = False # No interrupts to list the directory
+    interrupt_on['read_file'] = False # No problem in reading file except bloating context memory
 
     hitl_middleware = HumanInTheLoopMiddleware(
         interrupt_on=interrupt_on
