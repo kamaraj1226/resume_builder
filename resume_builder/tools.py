@@ -3,6 +3,35 @@ from resume_builder.mcp_client.duckduckgo_mcp_client import get_dkdkg_client_too
 from pathlib import Path
 
 # Read local file
+@tool(name_or_callable='read_local_pdf_file')
+def read_local_pdf_file(file_path: str, runtime: ToolRuntime) -> str:
+    """
+    Read local pdf file. This tool have the ability to read local pdf file
+    It won't extract or understands image.
+
+    Args:
+        file_path (str): local pdf filepath
+
+    Raises:
+        Exception: If file is not found it will raise File not found exception
+
+    Returns:
+        str: Return file content if exists
+    """
+    import fitz
+    path = Path(file_path)
+    writer = runtime.stream_writer
+    writer(f"Reading pdf file ==================: {path.name}")
+
+    if not path.is_file():
+        raise Exception(f"File not found: {file_path}")
+    
+    with fitz.open(path) as doc:
+        return ''.join([page.get_text() for page in doc])
+    
+    return ''
+
+# Read local file
 @tool(name_or_callable="read_local_file")
 def read_local_file(file_path: str, runtime: ToolRuntime) -> str:
     """
