@@ -4,7 +4,7 @@ from resume_builder.utils import get_ollama_model
 from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
-from resume_builder.tools import get_current_working_dir
+from resume_builder.tools import get_current_working_dir, read_local_pdf_file
 import os
 
 def get_general_agent():
@@ -23,6 +23,7 @@ def get_file_system_explorer_agent():
     os.makedirs(working_dir, exist_ok=True)
     toolkit = FileManagementToolkit(root_dir=working_dir)
     tools = toolkit.get_tools()
+    tools.append(read_local_pdf_file)
 
     # human in the loop middleware
     interrupt_on = {tool.name : True for tool in tools}

@@ -1,8 +1,9 @@
-from resume_builder.agent import get_file_system_explorer_agent
+from resume_builder.agents.agent import get_file_system_explorer_agent
 from resume_builder.stream.stream import stream
 from resume_builder.constants import StreamMode
 import uuid
 import asyncio
+
 
 async def async_main() -> None:
     agent = get_file_system_explorer_agent()
@@ -18,9 +19,10 @@ async def async_main() -> None:
         stream_mode=stream_modes,
         version=version,
         config=config,
-        show_tool_output=False
+        show_tool_output=False,
     )
     print()
+
 
 def main():
     asyncio.run(async_main())
