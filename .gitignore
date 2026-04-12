@@ -12,3 +12,4 @@ wheels/
 *.pdf
 *.tex
 .env
+*job_description.txt
