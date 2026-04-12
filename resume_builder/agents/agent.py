@@ -31,6 +31,6 @@ def get_file_system_explorer_agent():
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=MemoryProvider(),
+        checkpointer=MemoryProvider().checkpointer,
     )
     return agent

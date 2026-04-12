@@ -12,45 +12,49 @@ def handle_updates(chunk):
     if "__interrupt__" not in chunk["data"]:
         return None
 
-    # 1. Unpack the first Interrupt object from the tuple
-    # chunk['data']['__interrupt__'] is (Interrupt(value=...),)
     interrupt_item = chunk["data"]["__interrupt__"][0]
-
-    # 2. Access the value (the dictionary we saw in your debug)
     details = interrupt_item.value
-
-    # 3. Extract the first action request for display
     action_requests = details.get("action_requests", [])
-    if action_requests:
-        first_request = action_requests[0]
-        action = first_request.get("name", "Unknown")
-        args = first_request.get("args", {})
-    else:
+
+    if not action_requests:
         return None
 
-    print(f"\n[PAUSED - Approval Required]")
-    print(f"Tool: {action} | Arguments: {args}")
+    decisions = []
 
-    choice = input("Approve? (y/n): ").strip().lower()
+    print(f"\n[PAUSED - {len(action_requests)} Actions Pending]")
 
-    # 4. Return the structured dictionary required by the middleware
-    if choice == "y":
-        return Command(resume={"decisions": [{"type": DecisionType.approve.value}]})
+    for request in action_requests:
+        action = request.get("name")
+        args = request.get("args")
+        tool_id = request.get("id")
 
-    reason_for_rejection = input("Explain why: ")
-    if not reason_for_rejection:
-        reason_for_rejection = "User rejected this action without providing a reason"
+        print(f"\nTool: {action} | Args: {args}")
+        choice = input("Approve (y), Reject (n), or Edit (e)? ").strip().lower()
 
-    return Command(
-        resume={
-            "decisions": [
-                {
-                    "type": DecisionType.reject.value,
-                    "comment": reason_for_rejection,
-                }
-            ]
-        }
-    )
+        if choice == "y":
+            decisions.append({"type": "approve", "id": tool_id})
+
+        elif choice == "e":
+            new_args = {}
+            for key, val in args.items():
+                u_input = input(f"  {key} [{val}]: ").strip()
+                new_args[key] = u_input if u_input != "" else val
+
+            # Match the schema the middleware expects
+            edited_action = request.copy()
+            edited_action["args"] = new_args
+            decisions.append(
+                {"type": "edit", "id": tool_id, "edited_action": edited_action}
+            )
+
+        else:
+            reason = input("Explain why: ")
+            decisions.append(
+                {"type": "reject", "id": tool_id, "comment": reason or "User rejected."}
+            )
+
+    # Return ALL decisions at once
+    return Command(resume={"decisions": decisions})
 
 
 def handle_messages(chunk, show_tool_output=True, last_role_container=None):

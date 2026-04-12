@@ -54,7 +54,8 @@ def read_local_file(file_path: str, runtime: ToolRuntime) -> str:
     writer(f"Reading ==================: {path.name}")
 
     if not path.is_file():
-        raise Exception(f"File not found: {file_path}")
+        # Handling this in safe mode
+        return f"File not found: {file_path}. Please check the provided path"
 
     content = path.read_text(encoding="utf-8")
     return content

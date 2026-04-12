@@ -44,7 +44,7 @@ async def get_dkdkg_agent(url: str, section_required: str):
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=MemoryProvider(),
+        checkpointer=MemoryProvider().checkpointer,
     )
 
     query = {"query": f"Extract {section_required} from this {url}"}

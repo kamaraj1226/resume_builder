@@ -50,12 +50,12 @@ def personalize_latex_with_jd_tool(
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=MemoryProvider(),
+        checkpointer=MemoryProvider().checkpointer,
         system_prompt=LATX_TO_MATCH_JD,
     )
 
-    stream_obj = StreamObj(agent=agent, config=config)
-    stream(job_description, **stream_obj.model_dump())
+    stream_obj = StreamObj(agent=agent)
+    stream(job_description, config=config, **stream_obj.model_dump())
 
 
 @tool(name_or_callable="pdf_to_latex")
@@ -77,7 +77,7 @@ def pdf_to_latex_agent_tool(query: str, config: RunnableConfig, runtime: ToolRun
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=MemoryProvider(),
+        checkpointer=MemoryProvider().checkpointer,
         system_prompt=PDF_TO_LATEX_PROMPT,
     )
 
