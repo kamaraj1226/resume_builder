@@ -7,10 +7,16 @@ import asyncio
 async def async_main() -> None:
     agent = orchestrator_agent()
     stream_obj = StreamObj(agent=agent)
-    user_input = get_user_input()
-    print("start streaming")
-    stream(user_input, **stream_obj.model_dump())
-    print()
+    while True:
+        user_input = get_user_input()
+        if user_input.strip() == "/quit":
+            break
+
+        if not user_input.strip():
+            continue
+        print("AI: ", end="")
+        stream(user_input, **stream_obj.model_dump())
+        print()
 
 
 def main():

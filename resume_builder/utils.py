@@ -64,9 +64,8 @@ Knowledge and hands-on experience with Carbon black EDR tool, alert detection an
     That should be tailored and match to my existing resume and job description
 
     """
-    print("\nyou>> ", end="")
-    user_input = input()
-    print()
+    print("you>> ", end="")
+    user_input = input().strip()
     return user_input
 
 
