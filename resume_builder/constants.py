@@ -15,3 +15,6 @@ class DecisionType(Enum):
 class AvailableModel(Enum):
     qwen_3_5_0_8_b: str = "qwen3.5:0.8b"
     qwen_3_5_4_b: str = "qwen3.5:4b"
+
+
+TRUSTED_TOOLS = {"list_directory", "read_file", "file_search"}

@@ -1,26 +1,15 @@
-from resume_builder.agents.agent import get_file_system_explorer_agent
+from resume_builder.agents.orchestrator import orchestrator_agent
 from resume_builder.stream.stream import stream
-from resume_builder.constants import StreamMode
-import uuid
+from resume_builder.utils import StreamObj, get_user_input
 import asyncio
 
 
 async def async_main() -> None:
-    agent = get_file_system_explorer_agent()
-    session_id = str(uuid.uuid4())
-    config = {
-        "configurable": {"thread_id": session_id}
-    }  # It is requried for human in the loop conversation
-    stream_modes = [mode.value for mode in StreamMode]
-    version = "v2"
+    agent = orchestrator_agent()
+    stream_obj = StreamObj(agent=agent)
+    user_input = get_user_input()
     print("start streaming")
-    stream(
-        agent=agent,
-        stream_mode=stream_modes,
-        version=version,
-        config=config,
-        show_tool_output=False,
-    )
+    stream(user_input, **stream_obj.model_dump())
     print()
 
 

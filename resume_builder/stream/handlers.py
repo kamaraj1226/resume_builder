@@ -42,10 +42,7 @@ def handle_updates(chunk):
             "decisions": [
                 {
                     "type": DecisionType.reject.value,
-                    "comment": (
-                        "User denied access to this file. Do not try to read it again. "
-                        "Provide a response based only on what you already know."
-                    ),
+                    "comment": ("Proceed with your known knowledge."),
                 }
             ]
         }
