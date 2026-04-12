@@ -4,6 +4,7 @@ from resume_builder.constants import AvailableModel
 from pydantic import BaseModel
 from typing import Any, List, Dict
 from resume_builder.constants import StreamMode
+from langgraph.checkpoint.memory import InMemorySaver
 import uuid
 
 
@@ -77,3 +78,13 @@ class StreamObj(BaseModel):
         "configurable": {"thread_id": str(uuid.uuid4())}
     }  # It is requried for human in the loop conversation
     show_tool_output: bool = True
+
+
+class MemoryProvider:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(MemoryProvider, cls).__new__(cls)
+            cls._instance.checkpointer = InMemorySaver()
+        return cls._instance

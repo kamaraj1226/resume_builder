@@ -1,8 +1,7 @@
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain.agents import create_agent
-from langgraph.checkpoint.memory import InMemorySaver
 
-from resume_builder.utils import get_ollama_model
+from resume_builder.utils import get_ollama_model, MemoryProvider
 from resume_builder.agents.agent_as_tools import (
     personalize_latex_with_jd_tool,
     pdf_to_latex_agent_tool,
@@ -29,7 +28,7 @@ def orchestrator_agent():
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=InMemorySaver(),
+        checkpointer=MemoryProvider(),
         system_prompt=ORCHESTRATOR,
     )
 

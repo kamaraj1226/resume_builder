@@ -1,8 +1,7 @@
 from langchain.agents import create_agent
 from resume_builder.tools import read_local_file
-from resume_builder.utils import get_ollama_model
+from resume_builder.utils import get_ollama_model, MemoryProvider
 from langchain.agents.middleware import HumanInTheLoopMiddleware
-from langgraph.checkpoint.memory import InMemorySaver
 from resume_builder.tools import (
     get_file_management_toolkit,
     read_local_pdf_file,
@@ -32,6 +31,6 @@ def get_file_system_explorer_agent():
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=InMemorySaver(),
+        checkpointer=MemoryProvider(),
     )
     return agent

@@ -1,11 +1,10 @@
 from langchain.agents import create_agent
 from langchain.tools import tool, ToolRuntime
 from langchain.agents.middleware import HumanInTheLoopMiddleware
-from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.runnables import RunnableConfig
 
 from resume_builder.constants import AvailableModel
-from resume_builder.utils import get_ollama_model, StreamObj
+from resume_builder.utils import get_ollama_model, StreamObj, MemoryProvider
 from resume_builder.tools import (
     read_local_pdf_file,
     get_file_management_toolkit,
@@ -51,11 +50,11 @@ def personalize_latex_with_jd_tool(
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=InMemorySaver(),
+        checkpointer=MemoryProvider(),
         system_prompt=LATX_TO_MATCH_JD,
     )
 
-    stream_obj = StreamObj(agent=agent)
+    stream_obj = StreamObj(agent=agent, config=config)
     stream(job_description, **stream_obj.model_dump())
 
 
@@ -78,9 +77,9 @@ def pdf_to_latex_agent_tool(query: str, config: RunnableConfig, runtime: ToolRun
         model=model,
         tools=tools,
         middleware=[hitl_middleware],
-        checkpointer=InMemorySaver(),
+        checkpointer=MemoryProvider(),
         system_prompt=PDF_TO_LATEX_PROMPT,
     )
 
-    stream_obj = StreamObj(agent=agent)
+    stream_obj = StreamObj(agent=agent, config=config)
     stream(query, **stream_obj.model_dump())

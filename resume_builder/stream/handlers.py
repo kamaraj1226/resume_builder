@@ -37,12 +37,16 @@ def handle_updates(chunk):
     if choice == "y":
         return Command(resume={"decisions": [{"type": DecisionType.approve.value}]})
 
+    reason_for_rejection = input("Explain why: ")
+    if not reason_for_rejection:
+        reason_for_rejection = "User rejected this action without providing a reason"
+
     return Command(
         resume={
             "decisions": [
                 {
                     "type": DecisionType.reject.value,
-                    "comment": ("Proceed with your known knowledge."),
+                    "comment": reason_for_rejection,
                 }
             ]
         }
