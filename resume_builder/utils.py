@@ -2,10 +2,51 @@ import os
 from langchain_ollama import ChatOllama
 from resume_builder.constants import AvailableModel
 from pydantic import BaseModel
-from typing import Any, List, Dict
+from typing import Any, List
 from resume_builder.constants import StreamMode
 from langgraph.checkpoint.memory import InMemorySaver
 import sys
+from dataclasses import dataclass, field
+
+
+class SingletonMeta(type):
+    """
+    Used to handle single ton
+    """
+
+    _instance = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instance:
+            cls._instance[cls] = super().__call__(*args, **kwargs)
+        return cls._instance[cls]
+
+
+@dataclass(frozen=True)
+class GetModel(metaclass=SingletonMeta):
+    _model: Any = field(init=False, repr=False)
+    model_name: str = AvailableModel.qwen_3_5_0_8_b
+
+    def __post_init__(self):
+        model_instance = get_ollama_model_instance(model_name=self.model_name)
+        object.__setattr__(self, "_model", model_instance)
+
+    @property
+    def model(self):
+        return self._model
+
+
+@dataclass(frozen=True)
+class MemoryProvider(metaclass=SingletonMeta):
+    _checkpointer: Any = field(init=False, repr=False)
+
+    def __post_init__(self):
+        checkpointer = InMemorySaver()
+        object.__setattr__(self, "_checkpointer", checkpointer)
+
+    @property
+    def checkpointer(self):
+        return self._checkpointer
 
 
 def get_ollama_host() -> str:
@@ -19,7 +60,12 @@ def get_ollama_model_name(model_name: AvailableModel) -> str:
     raise Exception(f"{model_name} is not available")
 
 
-def get_ollama_model(model_name: str = AvailableModel.qwen_3_5_4_b):
+def get_ollama_model(model_name: str = AvailableModel.qwen_3_5_0_8_b):
+    model = GetModel(model_name)
+    return model.model
+
+
+def get_ollama_model_instance(model_name: str = AvailableModel.qwen_3_5_0_8_b):
     model = ChatOllama(
         model=get_ollama_model_name(model_name=model_name),
         temperature=0.9,
@@ -29,9 +75,10 @@ def get_ollama_model(model_name: str = AvailableModel.qwen_3_5_4_b):
 
 
 def get_user_input():
-    print("You>> ", end="", flush=True)
+    print("You (press ctrl+d)>> ", end="", flush=True)
     try:
-        user_input = sys.stdin.read()
+        # user_input = sys.stdin.read()
+        user_input = input()  # TODO: temporary override
         return user_input.strip()
     except EOFError:
         return ""
@@ -44,13 +91,3 @@ class StreamObj(BaseModel):
     stream_mode: List[str] = [mode.value for mode in StreamMode]
     version: str = "v2"
     show_tool_output: bool = True
-
-
-class MemoryProvider:
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(MemoryProvider, cls).__new__(cls)
-            cls._instance.checkpointer = InMemorySaver()
-        return cls._instance

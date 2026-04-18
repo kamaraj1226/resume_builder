@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from resume_builder.constants import AvailableModel
 from resume_builder.utils import get_ollama_model, StreamObj, MemoryProvider
 from resume_builder.tools import (
-    read_local_pdf_file,
+    read_pdf_file,
     get_file_management_toolkit,
     get_proper_interrupt,
 )
@@ -35,7 +35,8 @@ def personalize_latex_with_jd_tool(
     """
     This agent tool with help you to tailor your latex resume to match the given job_description(jd)
     """
-    model = get_ollama_model(AvailableModel.qwen_3_5_4_b)
+    # model = get_ollama_model(AvailableModel.qwen_3_5_4_b)
+    model = get_ollama_model()
     tools = get_file_management_toolkit()
     tools.append(get_user_input_tool)
 
@@ -64,8 +65,8 @@ def pdf_to_latex_agent_tool(query: str, config: RunnableConfig, runtime: ToolRun
     This agent will help you to convert pdf to latex
     You should also provide query value
     """
-    model = get_ollama_model(AvailableModel.qwen_3_5_4_b)
-    tools = [read_local_pdf_file]
+    model = get_ollama_model()
+    tools = [read_pdf_file]
 
     writer = runtime.stream_writer
     writer(f"Invoking pdf_to_latex_agent")
@@ -81,5 +82,5 @@ def pdf_to_latex_agent_tool(query: str, config: RunnableConfig, runtime: ToolRun
         system_prompt=PDF_TO_LATEX_PROMPT,
     )
 
-    stream_obj = StreamObj(agent=agent, config=config)
-    stream(query, **stream_obj.model_dump())
+    stream_obj = StreamObj(agent=agent)
+    stream(query, config=config, **stream_obj.model_dump())

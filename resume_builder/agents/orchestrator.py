@@ -6,7 +6,7 @@ from resume_builder.agents.agent_as_tools import (
     personalize_latex_with_jd_tool,
     pdf_to_latex_agent_tool,
     get_user_input_tool,
-    read_local_pdf_file,
+    read_pdf_file,
 )
 from resume_builder.tools import get_proper_interrupt, get_file_management_toolkit
 from resume_builder.system_prompts import ORCHESTRATOR
@@ -19,7 +19,7 @@ def orchestrator_agent():
         personalize_latex_with_jd_tool,
         pdf_to_latex_agent_tool,
         get_user_input_tool,
-        read_local_pdf_file,
+        read_pdf_file,
     ]
     tools.extend(file_system_toolkit)
     interrupt_on = get_proper_interrupt(tools=tools)

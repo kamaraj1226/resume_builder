@@ -18,7 +18,7 @@ async def async_main() -> None:
 
         if not user_input.strip():
             continue
-        print("here")
+        print("Input received processing....")
         print("AI: ", end="")
         stream(user_input, config=config, **stream_obj.model_dump())
         print()

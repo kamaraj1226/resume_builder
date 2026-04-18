@@ -17,5 +17,4 @@ class AvailableModel(Enum):
     qwen_3_5_4_b: str = "qwen3.5:4b"
 
 
-# TRUSTED_TOOLS = {"list_directory", "read_file", "file_search"}
-TRUSTED_TOOLS = set()
+TRUSTED_TOOLS = {"list_directory", "read_file", "file_search"}
