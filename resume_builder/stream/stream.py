@@ -23,7 +23,7 @@ def stream(query, agent, stream_mode, version, config, show_tool_output=True):
                 )
 
             elif chunk_type == StreamMode.updates.value:
-                next_command = handle_updates(chunk=chunk)
+                next_command = handle_updates(chunk=chunk, config=config)
                 if next_command:
                     print("\n", flush=True)
                     role_state[0] = "interrupt"  # Mark state

@@ -1,6 +1,8 @@
 from langgraph.types import Command
 from resume_builder.constants import DecisionType
 
+from langchain_core.runnables import RunnableConfig
+
 
 def handle_messages(chunk):
     data, _metadata = chunk["data"]
@@ -8,7 +10,7 @@ def handle_messages(chunk):
         print(data.content, end="", flush=True)
 
 
-def handle_updates(chunk):
+def handle_updates(chunk, config: RunnableConfig):
     if "__interrupt__" not in chunk["data"]:
         return None
 
@@ -29,32 +31,23 @@ def handle_updates(chunk):
         tool_id = request.get("id")
 
         print(f"\nTool: {action} | Args: {args}")
-        choice = input("Approve (y), Reject (n), or Edit (e)? ").strip().lower()
+        choice = input("Approve (y), Reject (n)? ").strip().lower()
 
         if choice == "y":
-            decisions.append({"type": "approve", "id": tool_id})
-
-        elif choice == "e":
-            new_args = {}
-            for key, val in args.items():
-                u_input = input(f"  {key} [{val}]: ").strip()
-                new_args[key] = u_input if u_input != "" else val
-
-            # Match the schema the middleware expects
-            edited_action = request.copy()
-            edited_action["args"] = new_args
-            decisions.append(
-                {"type": "edit", "id": tool_id, "edited_action": edited_action}
-            )
+            decisions.append({"type": DecisionType.approve.value, "id": tool_id})
 
         else:
             reason = input("Explain why: ")
             decisions.append(
-                {"type": "reject", "id": tool_id, "comment": reason or "User rejected."}
+                {
+                    "type": DecisionType.reject.value,
+                    "id": tool_id,
+                    "comment": reason or "User rejected.",
+                }
             )
 
     # Return ALL decisions at once
-    return Command(resume={"decisions": decisions})
+    return Command(resume={"decisions": decisions, "config": config})
 
 
 def handle_messages(chunk, show_tool_output=True, last_role_container=None):
