@@ -1,6 +1,8 @@
-from langchain.tools import tool, ToolRuntime
-from resume_builder.mcp_client.duckduckgo_mcp_client import get_dkdkg_client_tools
 from pathlib import Path
+
+from langchain.tools import ToolRuntime, tool
+
+from resume_builder.mcp_client.duckduckgo_mcp_client import get_dkdkg_client_tools
 
 
 # Read local file
@@ -68,20 +70,21 @@ def get_current_working_dir() -> str:
 
 
 import os
+
 from langchain_community.agent_toolkits import FileManagementToolkit
+
 from resume_builder.constants import TRUSTED_TOOLS
 
 
 def get_file_management_toolkit():
     working_dir = get_current_working_dir()
-    working_dir = "/mnt/d/resume_building/resume_builder/files"  # Temporarly overriding to custom directory
     os.makedirs(working_dir, exist_ok=True)
     toolkit = FileManagementToolkit(root_dir=working_dir)
     tools = toolkit.get_tools()
     return tools
 
 
-from typing import List, Dict
+from typing import Dict, List
 
 
 def get_proper_interrupt(tools: List) -> Dict[str, bool]:
