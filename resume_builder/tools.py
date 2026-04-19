@@ -1,90 +1,65 @@
 from pathlib import Path
-
+from langchain_community.agent_toolkits import FileManagementToolkit
+from resume_builder.constants import TRUSTED_TOOLS
+from typing import Dict, List
 from langchain.tools import ToolRuntime, tool
-
 from resume_builder.mcp_client.duckduckgo_mcp_client import get_dkdkg_client_tools
 
 
-# Read local file
-@tool(name_or_callable="read_pdf_file")
-def read_pdf_file(file_path: str, runtime: ToolRuntime) -> str:
+@tool
+def read_pdf_file(file_path: str, runtime: ToolRuntime = None) -> str:
     """
-    Read local pdf file. This tool have the ability to read local pdf file
-    It won't extract or understands image.
-
+    Read local PDF files.
     Args:
-        file_path (str): local pdf filepath
-    Returns:
-        str: Return file content if exists
+        file_path (str): The local pdf filepath starting with / (e.g., '/document.pdf')
+        runtime (ToolRuntime): Injected automatically by the agent.
     """
-    import fitz
+    import fitz  # PyMuPDF
 
-    path = Path(file_path).expanduser().resolve()
-    writer = runtime.stream_writer
-    writer(f"Reading pdf file ==================: {path.name}")
+    # Use stream_writer if available for logging, else fallback to print
+    writer = getattr(runtime, "stream_writer", print)
+    writer(f"Attempting to open PDF: {file_path}")
 
-    if not path.is_file():
-        return (
-            f"File not found: {file_path}. Please check the provided path."
-            "You may need to include './' at the begining if you are using relative path"
-            f"path is resolved to {path}"
-        )
+    try:
+        # Deep Agents injects the backend into the runtime context
+        backend = None
+        if runtime:
+            # Try standard DeepAgents service lookup
+            if hasattr(runtime, "get_service"):
+                backend = runtime.get_service("backend")
+            # Try direct attribute access
+            elif hasattr(runtime, "backend"):
+                backend = runtime.backend
+            # Try nested services object
+            elif hasattr(runtime, "services"):
+                backend = getattr(runtime.services, "backend", None)
 
-    with fitz.open(path) as doc:
-        return "".join([page.get_text() for page in doc])
+        if backend:
+            # backend.read_file handles the virtual root (/) mapping
+            file_bytes = backend.read_file(file_path)
+            if isinstance(file_bytes, str):
+                file_bytes = file_bytes.encode("utf-8", errors="ignore")
+        else:
+            # Manual fallback: Look in the physical ./files folder
+            actual_path = Path("./files") / file_path.lstrip("/")
+            with open(actual_path, "rb") as f:
+                file_bytes = f.read()
 
-    return ""
+        # Extract text using PyMuPDF
+        with fitz.open(stream=file_bytes, filetype="pdf") as doc:
+            text = "".join([page.get_text() for page in doc])
 
+        return text if text.strip() else "The PDF is empty or only contains images."
 
-# Read local file
-@tool(name_or_callable="read_simple_file")
-def read_simple_file(file_path: str, runtime: ToolRuntime) -> str:
-    """
-    Tool have the ability to read simple local file
-    Can't able to read complex files like pdf, word or other types of file.
-
-    Args:
-        file_path (str): file path it should be of type python str
-
-    Returns:
-        str: Return file content if exists or error message
-    """
-    path = Path(file_path)
-    writer = runtime.stream_writer
-    writer(f"Reading ==================: {path.name}")
-
-    if not path.is_file():
-        # Handling this in safe mode
-        return (
-            f"File not found: {file_path}. Please check the provided path."
-            "You may need to include './' at the begining if you are using relative path"
-        )
-
-    content = path.read_text(encoding="utf-8")
-    return content
+    except FileNotFoundError:
+        return f"Error: File '{file_path}' not found in the workspace."
+    except Exception as e:
+        return f"Error reading PDF: {str(e)}"
 
 
 def get_current_working_dir() -> str:
     current_working_dir = str(Path.cwd().resolve(strict=True))
     return current_working_dir
-
-
-import os
-
-from langchain_community.agent_toolkits import FileManagementToolkit
-
-from resume_builder.constants import TRUSTED_TOOLS
-
-
-def get_file_management_toolkit():
-    working_dir = get_current_working_dir()
-    os.makedirs(working_dir, exist_ok=True)
-    toolkit = FileManagementToolkit(root_dir=working_dir)
-    tools = toolkit.get_tools()
-    return tools
-
-
-from typing import Dict, List
 
 
 def get_proper_interrupt(tools: List) -> Dict[str, bool]:

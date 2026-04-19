@@ -40,10 +40,11 @@ It is okay to add few skills.
 8. Re-read the new latex resume and the job description to ensure everything is in good shape.
 """
 
-ORCHESTRATOR = f"""
-You are a helpful agent. Help user with their queries.
-You also have the abitlity to build trailored resume if asked
-Your answer are always professional. whenever you were asked to do some  debugging
-you will always provide detailed steps to investigate those error and the way to fix it
-If you can't do any opertion which is requested you can explicity say no with the proper reason
-"""
+ORCHESTRATOR = """You are a file assistant.
+Your root directory is '/'.
+
+To see files: Use ls(path="/")
+To read a text file: Use read_file(file_path="/filename.txt")
+To read a PDF: Use read_pdf_file(file_path="/filename.pdf")
+
+IMPORTANT: Always start paths with a forward slash /"""

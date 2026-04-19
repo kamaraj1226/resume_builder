@@ -1,35 +1,44 @@
+from pathlib import Path
+from deepagents import create_deep_agent
+from deepagents.backends import FilesystemBackend
 from langchain.agents.middleware import HumanInTheLoopMiddleware
-from langchain.agents import create_agent
 
 from resume_builder.utils import get_ollama_model, MemoryProvider
-from resume_builder.agents.agent_as_tools import (
-    personalize_latex_with_jd_tool,
-    pdf_to_latex_agent_tool,
-    get_user_input_tool,
-    read_pdf_file,
-)
-from resume_builder.tools import get_proper_interrupt, get_file_management_toolkit
+from resume_builder.agents.agent_as_tools import read_pdf_file
+from resume_builder.tools import get_proper_interrupt
 from resume_builder.system_prompts import ORCHESTRATOR
 
 
 def orchestrator_agent():
     model = get_ollama_model()
-    file_system_toolkit = get_file_management_toolkit()
-    tools = [
-        personalize_latex_with_jd_tool,
-        pdf_to_latex_agent_tool,
-        get_user_input_tool,
-        read_pdf_file,
-    ]
-    tools.extend(file_system_toolkit)
-    interrupt_on = get_proper_interrupt(tools=tools)
 
-    hitl_middleware = HumanInTheLoopMiddleware(interrupt_on=interrupt_on)
+    root_file_dir = Path("./files").resolve()
+    root_file_dir.mkdir(parents=True, exist_ok=True)
+    print(f"✅ Backend pointing to: {root_file_dir}")
 
-    agent = create_agent(
+    # Setup the Backend
+    # 'virtual_mode=True' makes './files/test.txt' appear as '/test.txt' to the agent
+    file_system_backend = FilesystemBackend(
+        root_dir=str(root_file_dir), virtual_mode=True
+    )
+
+    # Setup Tools
+    # We ONLY add custom tools. 'ls', 'read_file', 'write_file' are
+    # automatically added by create_deep_agent because we provide a backend.
+    custom_tools = [read_pdf_file]
+
+    # Create the Agent
+    # IMPORTANT: Do NOT manually add FilesystemMiddleware to the list.
+    # create_deep_agent detects the 'backend' argument and adds it for you.
+    agent = create_deep_agent(
         model=model,
-        tools=tools,
-        middleware=[hitl_middleware],
+        tools=custom_tools,
+        backend=file_system_backend,  # This triggers the auto-tool generation
+        middleware=[
+            HumanInTheLoopMiddleware(
+                interrupt_on=get_proper_interrupt(tools=custom_tools)
+            )
+        ],
         checkpointer=MemoryProvider().checkpointer,
         system_prompt=ORCHESTRATOR,
     )
