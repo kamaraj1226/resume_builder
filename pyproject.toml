@@ -20,6 +20,9 @@ dependencies = [
 [tool.uv]
 package = true
 
+[tool.setuptools.packages.find]
+exclude = ["files*"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
